@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mango Brain · Augyanix</title>
+<meta name="description" content="Oka chinna neural network ni meere train cheyyandi. Download ledu, code ledu. Augyanix, AI in Telugu.">
+<meta property="og:title" content="Mango Brain · Neural network ni meere train cheyyandi">
+<meta property="og:description" content="Mangoes add cheyyandi, Train nokkandi, AI ela nerchukuntundo live lo chudandi.">
+<meta name="theme-color" content="#0D121D">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single 720px column on the Augyanix navy grid. Practice first (train the brain → inside one neuron), then the lesson. Brand palette, dark only. */
+:root {
+  --bg-top: #0D121D; --bg-mid: #11182A; --bg-bottom: #121A2B;
+  --bg-gradient: linear-gradient(180deg, #0D121D 0%, #11182A 50%, #121A2B 100%);
+  --bg-glow: rgba(30, 44, 78, 1);
+  --grid-line: rgba(150, 170, 205, 0.10);
+  --particle: #C9D3E2;
+  --text: #EEF2F6; --text-sub: #A9B4C2; --text-dim: #5B6B82;
+  --hairline: #34425A; --arrow: #7E8C9E; --surface: #2A3648; --surface-deep: #1A2232; --surface-stroke: #8FA0B5;
+  --purple-dark: #3C3489; --purple-light: #AFA9EC; --purple-dot: #7F77DD;
+  --teal-dark: #085041; --teal-light: #5DCAA5; --teal-dot: #1D9E75;
+  --coral-dark: #712B13; --coral-light: #F0997B; --coral-dot: #D85A30;
+  --red-dark: #791F1F; --red-light: #F09595; --fail: #E24B4A;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg-top); color: var(--text); font-family: var(--font-sans); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.backdrop { position: fixed; inset: 0; z-index: -2; background: var(--bg-gradient); }
+.backdrop::before { content: ""; position: absolute; inset: 0;
+  background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 96px 96px; background-position: center top;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,.9), rgba(0,0,0,.35)); -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.9), rgba(0,0,0,.35)); }
+.backdrop::after { content: ""; position: absolute; left: 50%; bottom: -20vh; width: 120vw; height: 70vh; transform: translateX(-50%); background: radial-gradient(closest-side, var(--bg-glow), transparent); }
+#particles { position: fixed; inset: 0; z-index: -1; pointer-events: none; width: 100%; height: 100%; }
+button { font: inherit; cursor: pointer; color: inherit; }
+:focus-visible { outline: 2px solid var(--purple-light); outline-offset: 2px; }
+[hidden] { display: none !important; }
+p { margin: 0; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-dim); }
+
+.app { padding-inline: 16px; padding-block: 24px 64px; }
+.wrap { max-width: 720px; margin: 0 auto; display: grid; gap: 72px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.logo { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+.logo i { width: 8px; height: 8px; border-radius: 50%; background: var(--purple-dot); box-shadow: 0 0 12px var(--purple-dot); }
+.nav { display: flex; gap: 4px; flex-wrap: wrap; }
+.nav a { color: var(--text-sub); text-decoration: none; font-size: 13px; padding: 6px 10px; border-radius: 8px; }
+.nav a:hover { color: var(--text); background: var(--surface-deep); }
+
+h1 { font-size: clamp(32px, 6.4vw, 48px); line-height: 1.08; letter-spacing: -0.03em; font-weight: 600; margin: 0; text-wrap: balance; }
+h1 .soft { color: var(--text-sub); }
+h2 { font-size: 26px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 600; margin: 0; text-wrap: balance; }
+h3 { font-size: 16px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+.lede { color: var(--text-sub); font-size: 17px; max-width: 56ch; }
+.sec { display: grid; gap: 20px; scroll-margin-top: 20px; }
+.sec-head { display: grid; gap: 8px; }
+.sec-head p { color: var(--text-sub); max-width: 60ch; }
+.panel { background: color-mix(in srgb, var(--surface-deep) 88%, transparent); border: 1px solid var(--hairline); border-radius: 20px; padding: 20px; display: grid; gap: 18px; min-width: 0; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.fine { font-size: 13px; color: var(--text-dim); }
+
+/* ---------- Controls ---------- */
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.go { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--text); color: var(--bg-top); border: 0; border-radius: 12px; padding: 11px 20px; font-weight: 600; font-size: 15px; min-width: 128px; }
+.go:active { transform: scale(.98); }
+.ghost { background: transparent; border: 1px solid var(--hairline); border-radius: 12px; padding: 10px 14px; font-size: 14px; color: var(--text-sub); }
+.ghost:hover { color: var(--text); border-color: var(--arrow); }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.seg { display: inline-flex; border: 1px solid var(--hairline); border-radius: 10px; padding: 3px; gap: 2px; background: var(--bg-top); }
+.seg button { border: 0; background: transparent; border-radius: 7px; padding: 5px 11px; font-size: 13px; color: var(--text-sub); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--text); }
+.ctl { display: grid; gap: 6px; }
+.ctl > span { font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); }
+.ctls { display: flex; flex-wrap: wrap; gap: 14px 20px; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+
+/* ---------- Train area ---------- */
+.train { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 640px) { .train { grid-template-columns: 1fr; } }
+.board { position: relative; }
+.board canvas { width: 100%; aspect-ratio: 1; display: block; border-radius: 14px; border: 1px solid var(--hairline); touch-action: manipulation; cursor: crosshair; max-width: 100%; }
+.axis-x, .axis-y { font-size: 12px; color: var(--text-dim); }
+.axis-x { display: flex; justify-content: space-between; margin-top: 6px; }
+.badge { position: absolute; left: 10px; top: 10px; font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--hairline); background: color-mix(in srgb, var(--bg-top) 80%, transparent); color: var(--text-sub); pointer-events: none; }
+.badge.ok { color: var(--teal-light); border-color: var(--teal-dark); }
+.side { display: grid; gap: 14px; min-width: 0; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--hairline); border-radius: 12px; }
+.stat { padding: 10px 12px; display: grid; gap: 1px; min-width: 0; }
+.stat + .stat { border-left: 1px solid var(--hairline); }
+.stat b { font-family: var(--font-mono); font-size: 19px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 11.5px; color: var(--text-dim); }
+.spark { border: 1px solid var(--hairline); border-radius: 12px; padding: 10px 12px 8px; display: grid; gap: 4px; }
+.spark canvas { width: 100%; height: 54px; display: block; }
+.spark .row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-dim); }
+.netbox { border: 1px solid var(--hairline); border-radius: 12px; padding: 8px; }
+#net { width: 100%; height: auto; display: block; }
+#net text { font-family: var(--font-sans); font-size: 11px; fill: var(--text-sub); }
+#net .node { fill: var(--surface-deep); stroke: var(--surface-stroke); stroke-width: 1.5; }
+#net .node.in { stroke: var(--arrow); }
+#net .node.out { stroke: var(--teal-dot); }
+#net .node.hid { stroke: var(--purple-dot); }
+.netkey { display: flex; gap: 12px; flex-wrap: wrap; font-size: 11.5px; color: var(--text-dim); padding: 2px 6px 0; }
+.netkey i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+.hint { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--coral-dark); background: color-mix(in srgb, var(--coral-dark) 30%, transparent); color: var(--coral-light); }
+.hint.good { border-color: var(--teal-dark); background: color-mix(in srgb, var(--teal-dark) 35%, transparent); color: var(--teal-light); }
+.hint.info { border-color: var(--hairline); background: var(--bg-top); color: var(--text-sub); }
+
+/* ---------- Guide ---------- */
+.guide { border: 1px solid var(--purple-dark); background: linear-gradient(180deg, color-mix(in srgb, var(--purple-dark) 32%, transparent), transparent 90%); border-radius: 16px; padding: 16px; display: grid; gap: 10px; }
+.g-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.g-top .eyebrow { color: var(--purple-light); }
+.g-dots { display: flex; gap: 5px; flex: 1; }
+.g-dots i { width: 22px; height: 4px; border-radius: 4px; background: var(--hairline); }
+.g-dots i.done { background: var(--teal-dot); }
+.g-dots i.cur { background: var(--purple-light); }
+.g-x { border: 0; background: none; font-size: 12.5px; color: var(--text-dim); padding: 2px 4px; }
+.g-x:hover { color: var(--text-sub); }
+.guide h3 { font-size: 18px; }
+.guide > p { color: var(--text-sub); font-size: 15px; }
+.g-checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.g-checks li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; }
+.g-checks li::before { content: ""; flex: none; width: 16px; height: 16px; margin-top: 3px; border-radius: 50%; border: 1.5px solid var(--arrow); }
+.g-checks li.now { color: var(--text); font-weight: 500; }
+.g-checks li.now::before { border-color: var(--purple-light); box-shadow: 0 0 0 3px color-mix(in srgb, var(--purple-dot) 35%, transparent); }
+.g-checks li.ok { color: var(--text-dim); text-decoration: line-through; text-decoration-color: var(--hairline); }
+.g-checks li.ok::before { border-color: var(--teal-dot); background: var(--teal-dot) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' fill='none' stroke='%230D121D' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat; }
+.g-learn { border: 1px solid var(--teal-dark); background: color-mix(in srgb, var(--teal-dark) 35%, transparent); border-radius: 12px; padding: 12px 14px; display: grid; gap: 4px; font-size: 14.5px; color: var(--text-sub); animation: rise .4s both; }
+.g-learn b { color: var(--teal-light); font-weight: 500; }
+.g-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.g-actions .ghost { padding: 8px 12px; font-size: 13px; }
+.g-actions a { color: var(--purple-light); font-size: 14px; }
+.pulse { animation: pulse 1.5s ease-out infinite; border-radius: 12px; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(175,169,236,.75); } 70% { box-shadow: 0 0 0 10px rgba(175,169,236,0); } 100% { box-shadow: 0 0 0 0 rgba(175,169,236,0); } }
+.readme { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; font-size: 12.5px; color: var(--text-sub); border-top: 1px solid var(--hairline); padding-top: 14px; }
+.readme span { display: flex; gap: 8px; align-items: center; min-width: 0; }
+.readme i { flex: none; display: inline-block; }
+.readme .sw-dot { width: 10px; height: 10px; border-radius: 50%; background: linear-gradient(90deg, var(--teal-light) 50%, var(--coral-light) 50%); }
+.readme .sw-bg { width: 14px; height: 10px; border-radius: 3px; background: linear-gradient(90deg, rgba(29,158,117,.5), rgba(216,90,48,.5)); }
+.readme .sw-ring { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--fail); }
+.readme .sw-line { width: 14px; height: 3px; border-radius: 2px; background: var(--purple-light); }
+@media (max-width: 400px) { .readme { grid-template-columns: 1fr; } }
+
+/* ---------- Neuron ---------- */
+.neuron { display: grid; gap: 18px; }
+.sliders { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; }
+@media (max-width: 520px) { .sliders { grid-template-columns: 1fr; } }
+.sl { display: grid; gap: 4px; }
+.sl .top { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+.sl .top span { color: var(--text-sub); }
+.sl .top b { font-family: var(--font-mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+.sl.w .top b { color: var(--purple-light); }
+.sl.x .top b { color: var(--text); }
+input[type=range] { width: 100%; accent-color: var(--purple-dot); }
+.sl.x input[type=range] { accent-color: var(--surface-stroke); }
+.group-label { grid-column: 1 / -1; font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); border-top: 1px solid var(--hairline); padding-top: 12px; }
+.group-label:first-child { border-top: 0; padding-top: 0; }
+.calc { font-family: var(--font-mono); font-size: 14px; background: var(--bg-top); border: 1px solid var(--hairline); border-radius: 12px; padding: 14px; display: grid; gap: 8px; overflow-x: auto; }
+.calc .ln { white-space: pre; color: var(--text-sub); }
+.calc .ln b { color: var(--text); font-weight: 500; }
+.calc .w { color: var(--purple-light); }
+.calc .lbl { color: var(--text-dim); }
+.outrow { display: grid; grid-template-columns: minmax(0, 1fr) 150px; gap: 16px; align-items: center; }
+@media (max-width: 480px) { .outrow { grid-template-columns: 1fr; } }
+.outbig { display: grid; gap: 6px; }
+.outbig .pct { font-family: var(--font-mono); font-size: 52px; font-weight: 500; line-height: .95; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+.verdict { justify-self: start; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--hairline); }
+.verdict i { width: 7px; height: 7px; border-radius: 50%; }
+.verdict.yes { color: var(--teal-light); border-color: var(--teal-dark); background: color-mix(in srgb, var(--teal-dark) 35%, transparent); }
+.verdict.yes i { background: var(--teal-dot); }
+.verdict.no { color: var(--coral-light); border-color: var(--coral-dark); background: color-mix(in srgb, var(--coral-dark) 30%, transparent); }
+.verdict.no i { background: var(--coral-dot); }
+#sig { width: 100%; max-width: 200px; height: auto; display: block; justify-self: end; }
+@media (max-width: 480px) { #sig { justify-self: start; } .calc { font-size: 12px; padding: 12px; } }
+#sig .curve { fill: none; stroke: var(--arrow); stroke-width: 2; }
+#sig .grid { stroke: var(--hairline); stroke-width: 1; stroke-dasharray: 2 3; }
+#sig text { font-family: var(--font-mono); font-size: 9px; fill: var(--text-dim); }
+
+/* ---------- Learn ---------- */
+.divider { display: grid; gap: 10px; text-align: center; justify-items: center; padding-top: 8px; }
+.divider .line { width: 1px; height: 48px; background: linear-gradient(var(--hairline), transparent); }
+.divider h2 { font-size: 30px; }
+.divider p { color: var(--text-sub); max-width: 46ch; }
+.lesson { display: grid; grid-template-columns: 44px 1fr; gap: 0 16px; }
+.lesson .n { font-family: var(--font-mono); font-size: 13px; color: var(--text-dim); padding-top: 4px; }
+.lesson .body { display: grid; gap: 14px; min-width: 0; }
+.lesson .body > p { color: var(--text-sub); max-width: 60ch; }
+.lesson strong { color: var(--text); font-weight: 500; }
+@media (max-width: 560px) { .lesson { grid-template-columns: 1fr; gap: 6px; } }
+.loop { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; counter-reset: s; }
+.loop div { border: 1px solid var(--hairline); background: var(--surface-deep); border-radius: 12px; padding: 12px; display: grid; gap: 4px; align-content: start; counter-increment: s; }
+.loop div::before { content: "0" counter(s); font-family: var(--font-mono); font-size: 11px; color: var(--purple-light); }
+.loop b { font-weight: 500; font-size: 14.5px; }
+.loop span { font-size: 13px; color: var(--text-sub); }
+.loop .again { grid-column: 1 / -1; text-align: center; font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); border: 0; background: none; padding: 0; }
+.loop .again::before { content: none; }
+@media (max-width: 560px) { .loop { grid-template-columns: 1fr 1fr; } }
+.layers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--hairline); border-radius: 14px; overflow: hidden; }
+.layers > div { padding: 14px; display: grid; gap: 4px; align-content: start; }
+.layers > div + div { border-left: 1px solid var(--hairline); }
+.layers small { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; }
+.layers .l1 small { color: var(--arrow); } .layers .l2 small { color: var(--purple-light); } .layers .l3 small { color: var(--teal-light); }
+.layers span { font-size: 13.5px; color: var(--text-sub); }
+.layers .l2 { background: color-mix(in srgb, var(--purple-dark) 22%, transparent); }
+@media (max-width: 520px) { .layers { grid-template-columns: 1fr; } .layers > div + div { border-left: 0; border-top: 1px solid var(--hairline); } }
+.uses { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--hairline); border: 1px solid var(--hairline); border-radius: 14px; overflow: hidden; }
+.use { background: var(--surface-deep); padding: 16px; display: grid; gap: 4px; align-content: start; }
+.use p { font-size: 14px; color: var(--text-sub); }
+@media (max-width: 480px) { .uses { grid-template-columns: 1fr; } }
+.limits { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.limits li { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--hairline); background: var(--surface-deep); }
+.limits .tag { grid-row: span 2; align-self: start; font-family: var(--font-mono); font-size: 11px; color: var(--coral-light); border: 1px solid var(--coral-dark); background: color-mix(in srgb, var(--coral-dark) 30%, transparent); border-radius: 999px; padding: 2px 8px; margin-top: 2px; }
+.limits b { font-weight: 500; }
+.limits span:not(.tag) { font-size: 14px; color: var(--text-sub); }
+.recap { border: 1px solid var(--purple-dark); background: linear-gradient(180deg, color-mix(in srgb, var(--purple-dark) 35%, transparent), transparent); border-radius: 20px; padding: 24px; display: grid; gap: 16px; }
+.recap ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; counter-reset: r; }
+.recap li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; counter-increment: r; }
+.recap li::before { content: "0" counter(r); font-family: var(--font-mono); font-size: 12px; color: var(--purple-light); padding-top: 3px; }
+.recap .cta { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; border-top: 1px solid var(--hairline); padding-top: 16px; }
+.recap .cta p { color: var(--text-sub); font-size: 14px; }
+.handle { font-family: var(--font-mono); font-size: 14px; border: 1px solid var(--hairline); border-radius: 999px; padding: 6px 14px; }
+footer { display: grid; gap: 6px; font-size: 12.5px; color: var(--text-dim); border-top: 1px solid var(--hairline); padding-top: 20px; }
+@keyframes rise { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+.reveal { animation: rise .6s both cubic-bezier(.2,.8,.2,1); }
+@media (prefers-reduced-motion: reduce) { *, *::before { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="backdrop" aria-hidden="true"></div>
+<canvas id="particles" aria-hidden="true"></canvas>
+
+<main class="app">
+  <div class="wrap">
+    <div class="topbar reveal">
+      <div class="logo"><i></i>Augyanix</div>
+      <nav class="nav" aria-label="Sections"><a href="#train">Train</a><a href="#neuron">Neuron lopala</a><a href="#learn">Nerchukondi</a></nav>
+    </div>
+
+    <!-- ============ PRACTICE 1 · Train ============ -->
+    <section class="sec reveal" id="train">
+      <div class="sec-head">
+        <div class="eyebrow">Mango Brain · neural network live demo</div>
+        <h1>Chinna pillalu mangoes ruchi chusi nerchukuntaru. <span class="soft">AI kuda anthe.</span></h1>
+        <p class="lede">Kinda unna missions follow avvandi, step by step chupistam. Prathi chukka oka mango: entha theepi, entha mettaga undo. <b style="color:var(--teal-light);font-weight:500">Teal</b> = tinadaniki ready, <b style="color:var(--coral-light);font-weight:500">coral</b> = ready kaadu. <b style="color:var(--text);font-weight:500">Train</b> nokkandi, brain ela nerchukuntundo chudandi.</p>
+      </div>
+
+      <div class="panel">
+        <div class="guide" id="guide" aria-live="polite">
+          <div class="g-top"><span class="eyebrow" id="gStep">Mission 1 / 5</span><div class="g-dots" id="gDots"></div><button class="g-x" id="gClose" type="button">Guide close ✕</button></div>
+          <h3 id="gTitle"></h3>
+          <p id="gText"></p>
+          <ul class="g-checks" id="gChecks"></ul>
+          <div class="g-learn" id="gLearn" hidden><b>Meeru ippudu nerchukunnadi</b><span id="gLearnT"></span></div>
+          <div class="g-actions"><button class="go" id="gNext" type="button" hidden>Next mission →</button><button class="ghost" id="gJump" type="button" hidden>Neuron section ki vellu ↓</button><button class="ghost" id="gSkip" type="button">Ee mission skip</button></div>
+        </div>
+        <button class="ghost" id="gOpen" type="button" hidden style="justify-self:start">Step-by-step guide open cheyyandi</button>
+        <div class="toolbar">
+          <div class="btns">
+            <button class="go" id="trainBtn" type="button">▶ Train</button>
+            <button class="ghost" id="resetBtn" type="button">Brain reset</button>
+          </div>
+          <div class="ctls">
+            <div class="ctl"><span>Mangoes</span>
+              <div class="seg" id="dataSeg"><button type="button" data-v="simple" aria-pressed="true">Easy</button><button type="button" data-v="tricky" aria-pressed="false">Tricky</button></div>
+            </div>
+            <div class="ctl"><span>Hidden neurons</span>
+              <div class="seg" id="hidSeg"><button type="button" data-v="0" aria-pressed="false">0</button><button type="button" data-v="2" aria-pressed="false">2</button><button type="button" data-v="4" aria-pressed="true">4</button><button type="button" data-v="8" aria-pressed="false">8</button></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="train">
+          <div class="board">
+            <canvas id="board" aria-label="Mango chart: x axis is sweetness, y axis is softness. Tap to add a mango."></canvas>
+            <span class="badge" id="badge">Brain inka nerchukoledu</span>
+            <div class="axis-x"><span>← Pullaga</span><span>Theepi (sweetness) →</span></div>
+            <p class="fine" style="margin-top:2px">Paiki vellina koddi mettaga (softness). Background colour = brain yokka guess.</p>
+          </div>
+          <div class="side">
+            <div class="stats">
+              <div class="stat"><b id="ep">0</b><span>Rounds</span></div>
+              <div class="stat"><b id="loss">–</b><span>Thappulu (loss)</span></div>
+              <div class="stat"><b id="acc">–</b><span>Correct</span></div>
+            </div>
+            <div class="spark">
+              <div class="row"><span>Thappulu taggutunnaya?</span><span id="lossNow"></span></div>
+              <canvas id="spark" aria-hidden="true"></canvas>
+            </div>
+            <div class="netbox">
+              <svg id="net" viewBox="0 0 300 200" role="img" aria-label="Network diagram: 2 inputs, hidden neurons, 1 output. Line thickness shows weight strength."></svg>
+              <div class="netkey"><span><i style="background:var(--teal-light)"></i>+ weight</span><span><i style="background:var(--purple-light)"></i>− weight</span><span>Mandam = strong</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ctls" style="align-items:end">
+          <div class="ctl"><span>Tap chesi mango add cheyyandi</span>
+            <div class="seg" id="addSeg"><button type="button" data-v="1" aria-pressed="true"><i class="dot" style="background:var(--teal-light)"></i>Ready</button><button type="button" data-v="0" aria-pressed="false"><i class="dot" style="background:var(--coral-light)"></i>Ready kaadu</button></div>
+          </div>
+          <button class="ghost" id="clearBtn" type="button">Mangoes clear</button>
+        </div>
+        <div class="hint info" id="hint" role="status">Train nokkandi. Background colours slow ga mangoes ki match avvadam chudandi.</div>
+        <div class="readme" aria-label="Ela chadavali">
+          <span><i class="sw-dot"></i>Chukka = mango. Colour = correct answer</span>
+          <span><i class="sw-bg"></i>Background = brain guess</span>
+          <span><i class="sw-ring"></i>Red ring = brain thappu cheppindi</span>
+          <span><i class="sw-line"></i>Thappulu graph kindaki = better</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PRACTICE 2 · One neuron ============ -->
+    <section class="sec" id="neuron">
+      <div class="sec-head">
+        <div class="eyebrow">Neuron lopala</div>
+        <h2>Oka neuron chese pani: guninchi, kalipi, decide</h2>
+        <p>Paina brain lo prathi circle oka neuron. Okkati ela pani chestundo sliders tho meere chudandi. Training lo ee <b style="color:var(--purple-light);font-weight:500">weights</b> ni computer tane set chestundi.</p>
+      </div>
+      <div class="panel neuron">
+        <div class="sliders">
+          <div class="group-label">Input · mango</div>
+          <label class="sl x"><span class="top"><span>Theepi</span><b id="xsV"></b></span><input type="range" id="xs" min="0" max="10" step="0.5" value="7"></label>
+          <label class="sl x"><span class="top"><span>Mettadanam</span><b id="xmV"></b></span><input type="range" id="xm" min="0" max="10" step="0.5" value="6"></label>
+          <div class="group-label">Weights · neuron nerchukune numbers</div>
+          <label class="sl w"><span class="top"><span>Theepi weight</span><b id="w1V"></b></span><input type="range" id="w1" min="-2" max="2" step="0.1" value="0.8"></label>
+          <label class="sl w"><span class="top"><span>Mettadanam weight</span><b id="w2V"></b></span><input type="range" id="w2" min="-2" max="2" step="0.1" value="0.6"></label>
+          <label class="sl w"><span class="top"><span>Bias (threshold)</span><b id="bV"></b></span><input type="range" id="b" min="-15" max="5" step="0.5" value="-8"></label>
+        </div>
+        <div class="calc" aria-live="polite">
+          <div class="ln"><span class="lbl">1 · guninchu </span><span id="c1"></span></div>
+          <div class="ln"><span class="lbl">            </span><span id="c1b"></span></div>
+          <div class="ln"><span class="lbl">2 · kalupu   </span><span id="c2"></span></div>
+          <div class="ln"><span class="lbl">3 · squash   </span><span id="c3"></span></div>
+        </div>
+        <div class="outrow">
+          <div class="outbig">
+            <div class="pct" id="np">0%</div>
+            <div class="verdict" id="nv"><i></i><span id="nvT"></span></div>
+          </div>
+          <svg id="sig" viewBox="0 0 150 90" role="img" aria-label="Sigmoid curve: squashes any number into 0 to 1"></svg>
+        </div>
+        <div class="g-learn" id="nDone" hidden><b>Mission 5 complete ✓</b><span id="nDoneT"></span>
+          <div class="g-actions" style="margin-top:6px"><button class="go" id="nFinish" type="button">Concept chadavandi ↓</button></div></div>
+        <p class="fine">Try cheyyandi: "Theepi weight" ni negative cheste emavutundi? Pullaga unna mangoes ki "ready" ani cheptundi. Thappu weights = thappu answers. Andukey training kavali.</p>
+      </div>
+    </section>
+
+    <!-- ============ LEARN ============ -->
+    <div class="divider" id="learn">
+      <div class="line"></div>
+      <div class="eyebrow">Ippudu concept</div>
+      <h2>Neural network ante enti?</h2>
+      <p>Paina meeru chusinadi ela pani chestundo, 4 steps lo.</p>
+    </div>
+
+    <section class="lesson">
+      <div class="n">01</div>
+      <div class="body">
+        <h2>Neuron = chinna decision maker</h2>
+        <p>Prathi input ni oka <strong>weight</strong> tho guninchi, anni kalipi, oka <strong>bias</strong> add chesi, chivarlo 0 nunchi 1 madhya number ga marchutundi. Anthe! Mana brain neurons nunchi idea teesukunnaru, kaani idi chala simple math.</p>
+      </div>
+    </section>
+
+    <section class="lesson">
+      <div class="n">02</div>
+      <div class="body">
+        <h2>Neurons kalisi layers, layers kalisi network</h2>
+        <div class="layers">
+          <div class="l1"><small>Input layer</small><b>Data lopaliki</b><span>Theepi, mettadanam. Photo aite pixels.</span></div>
+          <div class="l2"><small>Hidden layers</small><b>Patterns nerchukuntayi</b><span>Okko neuron okko chinna rule. Kalisi complex shapes.</span></div>
+          <div class="l3"><small>Output layer</small><b>Final answer</b><span>"Ready: 92%" la oka prediction.</span></div>
+        </div>
+        <p>Paina <strong>Tricky</strong> mangoes tho <strong>0 hidden neurons</strong> try cheyyandi: brain straight line matrame geeyagaladu, so circle nerchukoledu. 4 neurons isthe ventane nerchukuntundi. Andukey "deep" learning lo chala layers untayi.</p>
+      </div>
+    </section>
+
+    <section class="lesson">
+      <div class="n">03</div>
+      <div class="body">
+        <h2>Training = ruchi chudu, thappu telusuko, sardhuko</h2>
+        <div class="loop">
+          <div><b>Guess</b><span>Ippudunna weights tho answer cheppu</span></div>
+          <div><b>Check</b><span>Correct answer tho polchi thappu (loss) kolavu</span></div>
+          <div><b>Adjust</b><span>Thappu taggela weights ni konchem marchu (backpropagation)</span></div>
+          <div><b>Repeat</b><span>Velasarlu. Paina "Rounds" ade.</span></div>
+          <p class="again">↺ thappulu chala takkuva ayye varaku</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="lesson">
+      <div class="n">04</div>
+      <div class="body">
+        <h2>Ivi ekkada pani chestunnayi?</h2>
+        <div class="uses">
+          <div class="use"><h3>Face unlock</h3><p>Mee face pixels nunchi "idi meere" ani decide cheyyadam.</p></div>
+          <div class="use"><h3>Google Translate</h3><p>Telugu sentence ni English loki marchadam.</p></div>
+          <div class="use"><h3>Spam filter</h3><p>Message chusi "spam aa kaadaa" ani cheppadam, mana mango laage.</p></div>
+          <div class="use"><h3>ChatGPT</h3><p>Billions of weights unna chala pedda neural network.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lesson">
+      <div class="n">!</div>
+      <div class="body">
+        <h2>Gurthupettukondi</h2>
+        <ul class="limits">
+          <li><span class="tag">limit</span><b>Data lekapothe nerchukoledu</b><span>Mangoes add cheyyakunda train cheste emi nerchukodu. Real AI ki lakshala examples kavali.</span></li>
+          <li><span class="tag">limit</span><b>Data lo thappu unte, adi kuda nerchukuntundi</b><span>Ready mango ni "ready kaadu" ani add cheyyandi, brain confuse avvadam chudandi.</span></li>
+          <li><span class="tag">limit</span><b>Enduku ala cheppindo cheppadu</b><span>Weights numbers matrame. Pedda networks lo "why" ardham chesukovadam kashtam (black box).</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="recap">
+      <div class="eyebrow" style="color:var(--purple-light)">Okka nimishamlo</div>
+      <ol>
+        <li>Neuron = inputs × weights, kalipi, 0–1 answer.</li>
+        <li>Neurons layers ga kalisthe network. Ekkuva layers = complex patterns.</li>
+        <li>Training = guess, thappu kolavu, weights sardhu, repeat.</li>
+      </ol>
+      <div class="cta">
+        <p>Next: <strong style="color:var(--text);font-weight:500">Deep Learning vs Machine Learning</strong>. Daily AI topics kosam follow avvandi.</p>
+        <span class="handle">@augyanix</span>
+      </div>
+    </section>
+
+    <footer>
+      <span>Ee page lo unna neural network nijamainadi: mee browser lone train avtundi. Download ledu, mee data ekkadiki pampadam ledu.</span>
+      <span>Augyanix · AI concepts in Telugu</span>
+    </footer>
+  </div>
+</main>
+
+<script>
+// Core NN + data generation, shared with the page (copied in verbatim)
+function rng(seed){ let s=seed>>>0; return ()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
+function makeData(kind, seed=7){
+  const r=rng(seed), pts=[];
+  if(kind==="simple"){
+    while(pts.length<36){ const x=.5+r()*9, y=.5+r()*9, m=x+y-10.5; if(Math.abs(m)<.9) continue; pts.push({x,y,c:m>0?1:0}); }
+  } else {
+    const cx=6.3, cy=5.2, R=2.5; let inside=0, out=0;
+    while(inside+out<56){ const x=.4+r()*9.2, y=.4+r()*9.2, d=Math.hypot(x-cx,y-cy); if(Math.abs(d-R)<.45) continue;
+      const c=d<R?1:0; if(c&&inside>=22) continue; if(!c&&out>=34) continue; c?inside++:out++; pts.push({x,y,c}); }
+  }
+  return pts;
+}
+const norm=(v)=>(v-5)/5;
+function makeNet(h){
+  const sizes=h?[2,h,1]:[2,1], L=[];
+  for(let l=0;l<sizes.length-1;l++){ const nin=sizes[l], nout=sizes[l+1], sc=1.6/Math.sqrt(nin);
+    const W=Array.from({length:nout},()=>Array.from({length:nin},()=>(Math.random()*2-1)*sc));
+    L.push({W,b:new Array(nout).fill(0),mW:W.map(r=>r.map(()=>0)),vW:W.map(r=>r.map(()=>0)),mb:new Array(nout).fill(0),vb:new Array(nout).fill(0)}); }
+  return {sizes,L,t:0};
+}
+function forward(net,x,y){
+  const acts=[[norm(x),norm(y)]];
+  net.L.forEach((ly,l)=>{ const a=acts[l], last=l===net.L.length-1;
+    acts.push(ly.W.map((row,j)=>{ let z=ly.b[j]; for(let i=0;i<row.length;i++) z+=row[i]*a[i]; return last?1/(1+Math.exp(-z)):Math.tanh(z); })); });
+  return acts;
+}
+const predict=(net,x,y)=>{ const a=forward(net,x,y); return a[a.length-1][0]; };
+function step(net,data,lr=0.04){
+  const gW=net.L.map(ly=>ly.W.map(r=>r.map(()=>0))), gb=net.L.map(ly=>ly.b.map(()=>0));
+  let loss=0, correct=0;
+  for(const p of data){
+    const acts=forward(net,p.x,p.y), out=acts[acts.length-1][0], e=1e-7;
+    loss+=-(p.c*Math.log(out+e)+(1-p.c)*Math.log(1-out+e)); if((out>.5)===(p.c===1)) correct++;
+    let delta=[out-p.c];
+    for(let l=net.L.length-1;l>=0;l--){ const ly=net.L[l], a=acts[l];
+      for(let j=0;j<delta.length;j++){ gb[l][j]+=delta[j]; for(let i=0;i<a.length;i++) gW[l][j][i]+=delta[j]*a[i]; }
+      if(l>0){ delta=a.map((ai,i)=>{ let s=0; for(let j=0;j<delta.length;j++) s+=ly.W[j][i]*delta[j]; return s*(1-ai*ai); }); } }
+  }
+  const n=data.length||1; net.t++; const b1=.9,b2=.999,t=net.t;
+  net.L.forEach((ly,l)=>{
+    const upd=(g,m,v,get,set)=>{ g/=n; const mm=b1*m+(1-b1)*g, vv=b2*v+(1-b2)*g*g; set(mm,vv,get()-lr*(mm/(1-b1**t))/(Math.sqrt(vv/(1-b2**t))+1e-8)); };
+    ly.W.forEach((row,j)=>row.forEach((_,i)=>upd(gW[l][j][i],ly.mW[j][i],ly.vW[j][i],()=>ly.W[j][i],(m,v,w)=>{ly.mW[j][i]=m;ly.vW[j][i]=v;ly.W[j][i]=w;})));
+    ly.b.forEach((_,j)=>upd(gb[l][j],ly.mb[j],ly.vb[j],()=>ly.b[j],(m,v,w)=>{ly.mb[j]=m;ly.vb[j]=v;ly.b[j]=w;}));
+  });
+  return {loss:loss/n, acc:data.length?correct/n:0};
+}
+
+
+(() => {
+const $ = (id) => document.getElementById(id);
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const hex = (h) => { h = h.replace("#", ""); return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)); };
+
+/* ---------- Particles ---------- */
+(() => {
+  const c = $("particles"), ctx = c.getContext("2d"); let W, H, dots = [];
+  const resize = () => { const d = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; c.width = W * d; c.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0);
+    dots = Array.from({ length: Math.round(Math.min(40, W / 30)) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.2 + .4, v: Math.random() * .25 + .08, a: Math.random() * .35 + .1 })); };
+  resize(); addEventListener("resize", resize);
+  const col = css("--particle");
+  const draw = () => { ctx.clearRect(0, 0, W, H); ctx.fillStyle = col;
+    for (const d of dots) { if (!reduced) { d.y -= d.v; if (d.y < -4) { d.y = H + 4; d.x = Math.random() * W; } } ctx.globalAlpha = d.a; ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, 7); ctx.fill(); }
+    if (!reduced) requestAnimationFrame(draw); };
+  draw();
+})();
+
+/* ---------- State ---------- */
+let kind = "simple", hidden = 4, addClass = 1;
+let data = makeData(kind), net = makeNet(hidden);
+let running = false, epoch = 0, hist = [], last = { loss: NaN, acc: NaN }, solvedAt = null;
+
+const C = {
+  base: hex(css("--bg-bottom")), teal: hex(css("--teal-dot")), coral: hex(css("--coral-dot")),
+  tealL: css("--teal-light"), coralL: css("--coral-light"), bg: css("--bg-top"), fail: css("--fail"),
+  grid: css("--grid-line"), purpleL: css("--purple-light"), hair: css("--hairline"), arrow: css("--arrow"),
+};
+
+/* ---------- Board ---------- */
+const board = $("board"), bctx = board.getContext("2d");
+const RES = 60, off = document.createElement("canvas"); off.width = off.height = RES;
+const octx = off.getContext("2d"), img = octx.createImageData(RES, RES);
+function sizeCanvas(cv) { const d = devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight; if (cv.width !== Math.round(w * d)) { cv.width = Math.round(w * d); cv.height = Math.round(h * d); } return [w, h, d]; }
+function drawBoard() {
+  const [w, h, d] = sizeCanvas(board);
+  bctx.setTransform(d, 0, 0, d, 0, 0);
+  for (let j = 0; j < RES; j++) for (let i = 0; i < RES; i++) {
+    const p = predict(net, (i + .5) / RES * 10, (1 - (j + .5) / RES) * 10);
+    const tgt = p > .5 ? C.teal : C.coral, k = Math.min(1, Math.abs(p - .5) * 2) * .42, o = (j * RES + i) * 4;
+    for (let c = 0; c < 3; c++) img.data[o + c] = C.base[c] + (tgt[c] - C.base[c]) * k;
+    img.data[o + 3] = 255;
+  }
+  octx.putImageData(img, 0, 0);
+  bctx.imageSmoothingEnabled = true; bctx.drawImage(off, 0, 0, w, h);
+  bctx.strokeStyle = C.grid; bctx.lineWidth = 1;
+  for (let g = 1; g < 10; g++) { const x = g / 10 * w, y = g / 10 * h; bctx.beginPath(); bctx.moveTo(x, 0); bctx.lineTo(x, h); bctx.moveTo(0, y); bctx.lineTo(w, y); bctx.stroke(); }
+  const r = Math.max(5, w / 60);
+  for (const p of data) {
+    const x = p.x / 10 * w, y = (1 - p.y / 10) * h, wrong = epoch > 0 && (predict(net, p.x, p.y) > .5) !== (p.c === 1);
+    bctx.beginPath(); bctx.arc(x, y, r, 0, 7); bctx.fillStyle = p.c ? C.tealL : C.coralL; bctx.fill();
+    bctx.lineWidth = 2; bctx.strokeStyle = C.bg; bctx.stroke();
+    if (wrong) { bctx.beginPath(); bctx.arc(x, y, r + 4, 0, 7); bctx.lineWidth = 1.5; bctx.strokeStyle = C.fail; bctx.stroke(); }
+  }
+}
+board.addEventListener("pointerdown", (e) => {
+  const rc = board.getBoundingClientRect();
+  const x = (e.clientX - rc.left) / rc.width * 10, y = (1 - (e.clientY - rc.top) / rc.height) * 10;
+  const gx = Math.min(9.8, Math.max(.2, x)), gy = Math.min(9.8, Math.max(.2, y)), gp = predict(net, gx, gy);
+  data.push({ x: gx, y: gy, c: addClass });
+  solvedAt = null; drawBoard();
+  const b = $("badge"); b.className = "badge" + ((gp > .5) === (addClass === 1) ? " ok" : "");
+  b.textContent = `Brain guess: ${gp > .5 ? "Ready" : "Ready kaadu"} ${Math.round((gp > .5 ? gp : 1 - gp) * 100)}%`;
+  flags.added = true; refreshGuide();
+  if (!running) setHint("info", "Kotha mango add ayyindi. Train nokkandi, brain malli nerchukuntundi.");
+});
+
+/* ---------- Loss sparkline ---------- */
+const spark = $("spark"), sctx = spark.getContext("2d");
+function drawSpark() {
+  const [w, h, d] = sizeCanvas(spark); sctx.setTransform(d, 0, 0, d, 0, 0); sctx.clearRect(0, 0, w, h);
+  sctx.strokeStyle = C.hair; sctx.lineWidth = 1; sctx.beginPath(); sctx.moveTo(0, h - .5); sctx.lineTo(w, h - .5); sctx.stroke();
+  if (hist.length < 2) return;
+  const mx = Math.max(.8, ...hist), n = hist.length;
+  const X = (i) => i / (n - 1) * (w - 4) + 2, Y = (v) => h - 3 - (v / mx) * (h - 8);
+  const grad = sctx.createLinearGradient(0, 0, 0, h); grad.addColorStop(0, "rgba(127,119,221,.35)"); grad.addColorStop(1, "rgba(127,119,221,0)");
+  sctx.beginPath(); hist.forEach((v, i) => i ? sctx.lineTo(X(i), Y(v)) : sctx.moveTo(X(i), Y(v)));
+  sctx.lineTo(X(n - 1), h); sctx.lineTo(X(0), h); sctx.closePath(); sctx.fillStyle = grad; sctx.fill();
+  sctx.beginPath(); hist.forEach((v, i) => i ? sctx.lineTo(X(i), Y(v)) : sctx.moveTo(X(i), Y(v)));
+  sctx.strokeStyle = C.purpleL; sctx.lineWidth = 1.6; sctx.stroke();
+  sctx.beginPath(); sctx.arc(X(n - 1), Y(hist[n - 1]), 3, 0, 7); sctx.fillStyle = C.purpleL; sctx.fill();
+}
+
+/* ---------- Network diagram ---------- */
+function drawNet() {
+  const cols = net.sizes.length, xs = cols === 2 ? [90, 250] : [82, 170, 258];
+  const ys = (n) => Array.from({ length: n }, (_, i) => n === 1 ? 92 : 22 + i * (140 / (n - 1)));
+  const pos = net.sizes.map((n, l) => ys(n).map((y) => [xs[l], y]));
+  let s = "";
+  net.L.forEach((ly, l) => ly.W.forEach((row, j) => row.forEach((w, i) => {
+    const [x1, y1] = pos[l][i], [x2, y2] = pos[l + 1][j];
+    s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${w >= 0 ? C.tealL : C.purpleL}" stroke-width="${(0.6 + Math.min(5, Math.abs(w) * 1.4)).toFixed(2)}" stroke-opacity="${(0.35 + Math.min(.6, Math.abs(w) * .25)).toFixed(2)}" stroke-linecap="round"/>`;
+  })));
+  const r = hidden >= 8 ? 7 : 10;
+  pos.forEach((col, l) => col.forEach(([x, y]) => {
+    const cls = l === 0 ? "in" : l === pos.length - 1 ? "out" : "hid";
+    s += `<circle class="node ${cls}" cx="${x}" cy="${y}" r="${l === 0 || l === pos.length - 1 ? 11 : r}"/>`;
+  }));
+  s += `<text x="${pos[0][0][0] - 16}" y="${pos[0][0][1] + 4}" text-anchor="end">Theepi</text>`;
+  s += `<text x="${pos[0][1][0] - 16}" y="${pos[0][1][1] + 4}" text-anchor="end">Mettaga</text>`;
+  const o = pos[pos.length - 1][0]; s += `<text x="${o[0]}" y="${o[1] + 28}" text-anchor="middle">Ready?</text>`;
+  if (cols === 3) s += `<text x="170" y="196" text-anchor="middle" style="fill:var(--purple-light)">hidden layer · ${hidden}</text>`;
+  else s += `<text x="170" y="196" text-anchor="middle">hidden layer ledu</text>`;
+  $("net").innerHTML = s;
+}
+
+/* ---------- Stats + hints ---------- */
+function setHint(type, text) { const h = $("hint"); h.className = "hint " + type; h.textContent = text; }
+function updateStats() {
+  $("ep").textContent = epoch;
+  $("loss").textContent = isFinite(last.loss) ? last.loss.toFixed(2) : "–";
+  $("acc").textContent = isFinite(last.acc) ? Math.round(last.acc * 100) + "%" : "–";
+  $("lossNow").textContent = hist.length > 1 ? `${hist[0].toFixed(2)} → ${hist[hist.length - 1].toFixed(2)}` : "";
+  const b = $("badge");
+  if (epoch === 0) { b.className = "badge"; b.textContent = "Brain inka nerchukoledu"; }
+  else if (last.acc === 1) { b.className = "badge ok"; b.textContent = "Anni correct ✓"; }
+  else { b.className = "badge"; b.textContent = `${Math.round(last.acc * 100)}% correct`; }
+}
+
+/* ---------- Training loop ---------- */
+function loop() {
+  if (!running) return;
+  const steps = reduced ? 20 : 1;
+  for (let k = 0; k < steps; k++) { last = step(net, data, kind === "simple" ? 0.012 : 0.04); epoch++; if (epoch % 2 === 0) { hist.push(last.loss); if (hist.length > 160) hist = hist.filter((_, i) => i % 2 === 0); } }
+  drawBoard(); drawSpark(); updateStats(); if (epoch % 3 === 0) drawNet();
+  if (data.length === 0) { stop(); setHint("", "Mangoes levu! Data lekapothe brain emi nerchukoledu. Board meeda tap chesi add cheyyandi."); return; }
+  if (last.acc === 1 && last.loss < .08) {
+    stop(); drawNet();
+    flags.solved = true; flags.solvedKind = kind; flags.solvedHidden = hidden; refreshGuide();
+    setHint("good", `Brain nerchukundi! ${epoch} rounds lo anni mangoes correct. Ippudu board meeda kotha mango tap chesi, background colour batti brain guess chudandi.`);
+    return;
+  }
+  if (hidden === 0 && kind === "tricky" && epoch > 400 && !solvedAt) {
+    solvedAt = epoch; flags.stuck = true; refreshGuide();
+    setHint("", "Inka nerchukolekapotundi! Hidden neurons 0 aite brain straight line matrame geeyagaladu. Circle kavali: Hidden neurons 4 select cheyyandi.");
+  }
+  if (epoch > 3000) { stop(); if (last.acc < 1) setHint("", "3000 rounds ayyayi, inka konni thappulu unnayi. Data lo kalisipoyina mangoes unnaya? Leda ekkuva hidden neurons try cheyyandi."); return; }
+  requestAnimationFrame(loop);
+}
+function start() { if (running) return;
+  const bt = board.getBoundingClientRect(); if (bt.top < 0 || bt.bottom > innerHeight) board.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" }); if (!data.length) { setHint("", "Mangoes levu! Board meeda tap chesi konni add cheyyandi."); return; } running = true; $("trainBtn").textContent = "❚❚ Pause"; if (!/Inka nerchukolekapotundi/.test($("hint").textContent)) setHint("info", "Training… prathi round lo weights konchem marutunnayi. Red rings = ippatiki thappu ga cheppina mangoes."); requestAnimationFrame(loop); }
+function stop() { running = false; $("trainBtn").textContent = "▶ Train"; }
+function resetBrain(msg) {
+  stop(); net = makeNet(hidden); epoch = 0; hist = []; last = { loss: NaN, acc: NaN }; solvedAt = null;
+  drawBoard(); drawSpark(); drawNet(); updateStats();
+  setHint("info", msg || "Kotha brain: random weights, emi teliyadu. Train nokkandi.");
+}
+$("trainBtn").addEventListener("click", () => running ? stop() : start());
+$("resetBtn").addEventListener("click", () => resetBrain());
+$("clearBtn").addEventListener("click", () => { data = []; resetBrain("Board khali. Tap chesi mee own mangoes add cheyyandi, tarvatha Train nokkandi."); });
+
+function segment(id, fn) {
+  const seg = $(id);
+  seg.addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    seg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+    fn(b.dataset.v); refreshGuide();
+  });
+}
+segment("dataSeg", (v) => { kind = v; data = makeData(kind); resetBrain(kind === "tricky" ? "Tricky: perfect mango = mari pachchi kaadu, mari kullinadi kaadu, madhyalo. Mundu Hidden neurons 0 tho Train try cheyyandi." : undefined); });
+segment("hidSeg", (v) => { hidden = +v; resetBrain(hidden === 0 ? "Hidden layer ledu: okka neuron matrame. Straight line matrame geeyagaladu." : `${hidden} hidden neurons tho kotha brain. Train nokkandi.`); });
+segment("addSeg", (v) => { addClass = +v; });
+addEventListener("resize", () => { drawBoard(); drawSpark(); });
+
+/* ---------- One neuron ---------- */
+const sig = (z) => 1 / (1 + Math.exp(-z));
+const f = (v, n = 1) => (v < 0 ? "−" : "") + Math.abs(v).toFixed(n);
+(() => {
+  let s = `<line class="grid" x1="8" y1="45" x2="142" y2="45"/><line class="grid" x1="75" y1="6" x2="75" y2="80"/>`;
+  let d = ""; for (let i = 0; i <= 60; i++) { const z = -10 + i / 3, x = 8 + (z + 10) / 20 * 134, y = 78 - sig(z) * 70; d += (i ? "L" : "M") + x.toFixed(1) + " " + y.toFixed(1); }
+  s += `<path class="curve" d="${d}"/><text x="8" y="88">−10</text><text x="142" y="88" text-anchor="end">+10</text><text x="146" y="11" text-anchor="end">1</text><text x="146" y="80" text-anchor="end">0</text><circle id="sigDot" r="5" cx="75" cy="43"/>`;
+  $("sig").innerHTML = s;
+})();
+function updateNeuron() {
+  const xs = +$("xs").value, xm = +$("xm").value, w1 = +$("w1").value, w2 = +$("w2").value, b = +$("b").value;
+  $("xsV").textContent = xs.toFixed(1); $("xmV").textContent = xm.toFixed(1);
+  $("w1V").textContent = f(w1); $("w2V").textContent = f(w2); $("bV").textContent = f(b);
+  const p1 = xs * w1, p2 = xm * w2, z = p1 + p2 + b, p = sig(z);
+  $("c1").innerHTML = `<b>${xs.toFixed(1)}</b> × <span class="w">${f(w1)}</span> = ${f(p1, 2)}`;
+  $("c1b").innerHTML = `<b>${xm.toFixed(1)}</b> × <span class="w">${f(w2)}</span> = ${f(p2, 2)}`;
+  $("c2").innerHTML = `${f(p1, 2)} + ${f(p2, 2)} + <span class="w">${f(b)}</span> = <b>${f(z, 2)}</b>`;
+  $("c3").innerHTML = `sigmoid(${f(z, 2)}) = <b>${p.toFixed(2)}</b>`;
+  $("np").textContent = Math.round(p * 100) + "%";
+  const yes = p >= .5; $("nv").className = "verdict " + (yes ? "yes" : "no");
+  $("nvT").textContent = yes ? "Tinadaniki ready" : "Inka ready kaadu";
+  const zc = Math.max(-10, Math.min(10, z)), dot = document.getElementById("sigDot");
+  dot.setAttribute("cx", (8 + (zc + 10) / 20 * 134).toFixed(1)); dot.setAttribute("cy", (78 - sig(zc) * 70).toFixed(1));
+  dot.setAttribute("fill", yes ? C.tealL : C.coralL);
+}
+["xs", "xm", "w1", "w2", "b"].forEach((id) => $(id).addEventListener("input", () => { updateNeuron(); refreshGuide(); }));
+
+/* ---------- Guided missions ---------- */
+const flags = { solved: false, stuck: false, added: false };
+const MISSIONS = [
+  { title: "Brain ki nerpinchandi",
+    text: "Ee brain ki mangoes gurinchi emi teliyadu: weights anni random. Train nokki, adi ela nerchukuntundo chudandi.",
+    checks: [
+      { l: "Mangoes lo Easy select cheyyandi", ok: () => kind === "simple", t: "#dataSeg" },
+      { l: "▶ Train nokki, board meeda \"Anni correct ✓\" vachevaraku chudandi", ok: () => flags.solved && flags.solvedKind === "simple", t: "#trainBtn" },
+    ],
+    learn: "Background colour = brain guess. Modatlo random ga undi, training tarvatha mangoes ki match ayyindi. \"Thappulu\" graph kindaki vellindi, ante brain thappulu taggayi. Network lo lines mandam ayyayi: avi weights, avi nerchukunnayi." },
+  { title: "Brain ni test cheyyandi",
+    text: "Brain ippudu nerchukundi. Adi chudani kotha mango icchi, em guess chestundo chudandi.",
+    checks: [
+      { l: "Board meeda ekkadaina tap cheyyandi. Board paina badge lo brain guess vastundi", ok: () => flags.added, t: "#board" },
+    ],
+    learn: "Brain ee mango ni mundu eppudu chudaledu, kaani nerchukunna pattern tho guess chesindi. Dheenine prediction antaru. Face unlock kuda ilaane: kotha photo chusi guess chestundi." },
+  { title: "Tricky mangoes: single neuron tho",
+    text: "Perfect mango = mari pachchi kaadu, mari kullinadi kaadu, madhyalo untundi. Hidden neurons lekunda okka neuron tho try cheddam.",
+    checks: [
+      { l: "Mangoes lo Tricky select cheyyandi", ok: () => kind === "tricky", t: "#dataSeg" },
+      { l: "Hidden neurons 0 select cheyyandi", ok: () => hidden === 0, t: "#hidSeg" },
+      { l: "▶ Train nokki, konchem sepu wait cheyyandi", ok: () => flags.stuck && kind === "tricky" && hidden === 0, t: "#trainBtn" },
+    ],
+    learn: "Okka neuron straight line matrame geeyagaladu. Teal mangoes madhyalo circle la unnayi, line tho vidadeeyalemu. Andukey ~70% daggara aagipoyindi, entha train chesina." },
+  { title: "Hidden layer add cheyyandi",
+    text: "Ippudu brain ki 4 hidden neurons iddam. Same tricky mangoes.",
+    checks: [
+      { l: "Hidden neurons 4 select cheyyandi", ok: () => hidden >= 2 && kind === "tricky", t: "#hidSeg" },
+      { l: "▶ Train nokki, \"Anni correct ✓\" vachevaraku chudandi", ok: () => flags.solved && flags.solvedKind === "tricky" && flags.solvedHidden > 0, t: "#trainBtn" },
+    ],
+    learn: "Prathi hidden neuron okko straight line geestundi. Avi kalisi circle shape tayaru chesayi. Ekkuva neurons, layers = complex patterns. \"Deep learning\" lo deep ante ide: chala layers." },
+  { title: "Oka neuron lopala chudandi",
+    text: "Kinda section lo okka neuron yokka sliders unnayi. \"Theepi weight\" ni negative (−) ki jaruputhe emavutundo chudandi.",
+    jump: true,
+    checks: [
+      { l: "Theepi weight slider ni 0 kanna takkuva ki jarupandi", ok: () => +$("w1").value < 0, t: "#w1" },
+    ],
+    learn: "Weight negative aite, ekkuva theepi = takkuva score. Thappu weights tho brain thappu answers istundi. Training ante computer ee weights ni correct ga set cheyyadam, meeru Mission 1 lo chusinatte." },
+];
+let mi = 0, mDone = false;
+const g = (id) => document.getElementById(id);
+function clearPulse() { document.querySelectorAll(".pulse").forEach((e) => e.classList.remove("pulse")); }
+function startMission(i) {
+  mi = i; mDone = false; flags.solved = false; flags.stuck = false; flags.added = false;
+  if (i === 2 || i === 3) { /* fresh run for comparison */ }
+  refreshGuide();
+}
+function refreshGuide() {
+  if (g("guide").hidden) { clearPulse(); return; }
+  g("gDots").innerHTML = MISSIONS.map((_, i) => `<i class="${i < mi || (i === mi && mDone) ? "done" : i === mi ? "cur" : ""}"></i>`).join("");
+  if (mi >= MISSIONS.length) {
+    clearPulse();
+    g("gStep").textContent = "Complete";
+    g("gTitle").textContent = "Anni missions complete!";
+    g("gText").textContent = "Meeru oka neural network ni train chesaru, test chesaru, hidden layer enduku kavalo chusaru. Ippudu kinda concept chadavandi, anni connect avtayi.";
+    g("gChecks").innerHTML = ""; g("gLearn").hidden = true; g("gText").hidden = false; g("gSkip").hidden = false; g("gNext").hidden = true; g("gJump").hidden = true;
+    g("gSkip").textContent = "Malli modati nunchi"; g("nDone").hidden = true;
+    return;
+  }
+  const m = MISSIONS[mi];
+  g("gStep").textContent = `Mission ${mi + 1} / ${MISSIONS.length}`;
+  g("gTitle").textContent = m.title; g("gText").textContent = m.text;
+  g("gSkip").textContent = "Ee mission skip";
+  let firstOpen = -1;
+  const states = m.checks.map((c, i) => { const ok = c.ok(); if (!ok && firstOpen < 0) firstOpen = i; return ok; });
+  g("gChecks").innerHTML = m.checks.map((c, i) => `<li class="${states[i] ? "ok" : i === firstOpen ? "now" : ""}">${c.l}</li>`).join("");
+  const done = firstOpen < 0;
+  if (done && !mDone) mDone = true;
+  clearPulse();
+  if (!mDone) { const t = document.querySelector(m.checks[firstOpen].t); (t.id === "w1" ? t.closest("label") : t).classList.add("pulse"); }
+  else g("gNext").classList.add("pulse");
+  g("gLearn").hidden = !mDone; g("gLearnT").textContent = m.learn;
+  g("gText").hidden = mDone; g("gChecks").hidden = mDone; g("gSkip").hidden = mDone;
+  g("gNext").hidden = !mDone; g("gNext").textContent = mi === MISSIONS.length - 1 ? "Finish ✓" : "Next mission →";
+  g("gJump").hidden = !m.jump || mDone;
+  g("nDone").hidden = !(mi === 4 && mDone); g("nDoneT").textContent = m.learn;
+  g("gDots").innerHTML = MISSIONS.map((_, i) => `<i class="${i < mi || (i === mi && mDone) ? "done" : i === mi ? "cur" : ""}"></i>`).join("");
+}
+g("gNext").addEventListener("click", () => {
+  startMission(mi + 1);
+  if (mi === MISSIONS.length) g("guide").scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "nearest" });
+  else if (mi !== 4) g("train").scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+});
+g("nFinish").addEventListener("click", () => { startMission(MISSIONS.length); g("learn").scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" }); });
+g("gSkip").addEventListener("click", () => startMission(mi >= MISSIONS.length ? 0 : mi + 1));
+g("gJump").addEventListener("click", () => g("neuron").scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" }));
+g("gClose").addEventListener("click", () => { g("guide").hidden = true; g("gOpen").hidden = false; clearPulse(); });
+g("gOpen").addEventListener("click", () => { g("guide").hidden = false; g("gOpen").hidden = true; refreshGuide(); });
+
+/* ---------- Init ---------- */
+drawBoard(); drawSpark(); drawNet(); updateStats(); updateNeuron(); refreshGuide();
+})();
+</script>
+</body>
+</html>
